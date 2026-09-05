@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>افزودن FoxEggs به کیف پول</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Vazir', Tahoma, sans-serif;
+            background: #0b0e11;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            direction: rtl;
+            padding: 20px;
+        }
+        .card {
+            background: #1e2329;
+            padding: 40px 30px;
+            border-radius: 24px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8);
+            text-align: center;
+            max-width: 380px;
+            width: 100%;
+            border: 1px solid #2b3139;
+        }
+        .card .logo-wrapper {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 3px solid #f0b90b;
+            margin: 0 auto 20px;
+            overflow: hidden;
+            background: #2b3139;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .card .logo-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .card h2 {
+            color: #ffffff;
+            font-size: 26px;
+            margin: 10px 0 4px;
+            font-weight: 700;
+        }
+        .card .symbol {
+            color: #f0b90b;
+            font-weight: bold;
+            font-size: 20px;
+            letter-spacing: 1px;
+        }
+        .card .supply {
+            color: #7a8a9a;
+            font-size: 13px;
+            margin-top: 6px;
+        }
+        .btn {
+            background: #f0b90b;
+            border: none;
+            padding: 16px 24px;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #1e2329;
+            cursor: pointer;
+            transition: 0.3s;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 24px;
+        }
+        .btn:hover {
+            background: #d6a40a;
+            transform: scale(1.02);
+        }
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .btn .loader {
+            display: none;
+            width: 22px;
+            height: 22px;
+            border: 3px solid #1e2329;
+            border-top: 3px solid #f0b90b;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        .btn.loading .loader {
+            display: inline-block;
+        }
+        .btn.loading .btn-text {
+            display: none;
+        }
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        .status {
+            color: #a0aec0;
+            font-size: 14px;
+            margin-top: 16px;
+            min-height: 28px;
+            padding: 8px 12px;
+            border-radius: 10px;
+            background: #13171c;
+        }
+        .status.success {
+            color: #4caf50;
+            background: #1a2e1a;
+        }
+        .status.error {
+            color: #f44336;
+            background: #2e1a1a;
+        }
+        .note {
+            color: #5a6a7a;
+            font-size: 12px;
+            margin-top: 20px;
+            border-top: 1px solid #2b3139;
+            padding-top: 16px;
+            line-height: 1.8;
+        }
+        .note span {
+            display: inline-block;
+            margin: 0 4px;
+        }
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #2b3139;
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-size: 14px;
+            opacity: 0;
+            transition: 0.4s;
+            pointer-events: none;
+            border: 1px solid #f0b90b;
+            z-index: 999;
+        }
+        .toast.show {
+            opacity: 1;
+        }
+        .badge {
+            display: inline-block;
+            background: #2b3139;
+            color: #f0b90b;
+            padding: 4px 14px;
+            border-radius: 50px;
+            font-size: 12px;
+            margin-top: 8px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <!-- لوگو -->
+        <div class="logo-wrapper">
+            <img src="https://raw.githubusercontent.com/MelonaColloction/My-Amage-/refs/heads/main/Foxeggs.png" alt="FoxEggs Logo" id="tokenLogo" />
+        </div>
+
+        <!-- نام و نماد -->
+        <h2 id="tokenName">FoxEggs</h2>
+        <div class="symbol" id="tokenSymbol">Fox</div>
+        <div class="badge">⚡ شبکه Avalanche C-Chain</div>
+
+        <!-- دکمه افزودن به کیف پول -->
+        <button class="btn" id="addTokenBtn">
+            <span class="btn-text">➕ افزودن به کیف پول</span>
+            <span class="loader"></span>
+        </button>
+
+        <!-- وضعیت -->
+        <div class="status" id="statusMessage">🟢 برای افزودن توکن کلیک کنید</div>
+
+        <!-- توضیحات -->
+        <div class="note">
+            🔹 با یک کلیک، توکن <strong>FoxEggs (Fox)</strong> را به کیف پول خود اضافه کنید<br />
+            🔹 سازگار با متامسک، تراست والت و کیف‌پول‌های مشابه
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // ═══════════════════════════════════════════════════════════
+        // 🔧 اطلاعات توکن (آدرس مخفی شده، کاربر نمی‌بینه)
+        // ═══════════════════════════════════════════════════════════
+        const TOKEN = {
+            address: '0xfa234f160fe1389c7ead0365791a20ed1df6d582',
+            symbol: 'Fox',
+            name: 'FoxEggs',
+            decimals: 18,
+            image: 'https://raw.githubusercontent.com/MelonaColloction/My-Amage-/refs/heads/main/Foxeggs.png',
+        };
+        // ═══════════════════════════════════════════════════════════
+
+        const btn = document.getElementById('addTokenBtn');
+        const statusMsg = document.getElementById('statusMessage');
+        const toast = document.getElementById('toast');
+
+        function showToast(msg) {
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2500);
+        }
+
+        async function addToken() {
+            if (!window.ethereum) {
+                statusMsg.textContent = '❌ کیف پولی یافت نشد! متامسک یا تراست والت نصب کنید.';
+                statusMsg.className = 'status error';
+                return;
+            }
+
+            try {
+                const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+                if (chainId !== '0xa86a') {
+                    statusMsg.textContent = '⚠️ لطفاً شبکه را به Avalanche C-Chain تغییر دهید.';
+                    statusMsg.className = 'status error';
+                    try {
+                        await window.ethereum.request({
+                            method: 'wallet_switchEthereumChain',
+                            params: [{ chainId: '0xa86a' }],
+                        });
+                        setTimeout(() => addToken(), 1500);
+                        return;
+                    } catch {
+                        return;
+                    }
+                }
+            } catch (err) {
+                statusMsg.textContent = '❌ خطا در خواندن شبکه: ' + err.message;
+                statusMsg.className = 'status error';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.classList.add('loading');
+            statusMsg.textContent = '⏳ در حال ارسال درخواست به کیف پول...';
+            statusMsg.className = 'status';
+
+            try {
+                const wasAdded = await window.ethereum.request({
+                    method: 'wallet_watchAsset',
+                    params: {
+                        type: 'ERC20',
+                        options: {
+                            address: TOKEN.address,
+                            symbol: TOKEN.symbol,
+                            decimals: TOKEN.decimals,
+                            image: TOKEN.image,
+                        },
+                    },
+                });
+
+                if (wasAdded) {
+                    statusMsg.textContent = '✅ توکن FoxEggs با موفقیت به کیف پول اضافه شد!';
+                    statusMsg.className = 'status success';
+                    showToast('🎉 FoxEggs به کیف پول شما اضافه شد!');
+                } else {
+                    statusMsg.textContent = '❌ کاربر افزودن توکن را رد کرد.';
+                    statusMsg.className = 'status error';
+                }
+            } catch (error) {
+                let errorMsg = '❌ خطا: ';
+                if (error.code === 4001) {
+                    errorMsg += 'کاربر درخواست را رد کرد.';
+                } else {
+                    errorMsg += error.message || 'خطای ناشناخته';
+                }
+                statusMsg.textContent = errorMsg;
+                statusMsg.className = 'status error';
+            } finally {
+                btn.disabled = false;
+                btn.classList.remove('loading');
+            }
+        }
+
+        btn.addEventListener('click', addToken);
+
+        if (!window.ethereum) {
+            statusMsg.textContent = '⚠️ کیف پولی نصب نیست. متامسک یا تراست والت را نصب کنید.';
+            statusMsg.className = 'status error';
+            btn.disabled = true;
+        }
+    </script>
+
+</body>
+  </html>
