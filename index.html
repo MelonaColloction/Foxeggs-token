@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>افزودن FoxEggs به کیف پول</title>
+    <title>FoxEggs - افزودن به کیف پول</title>
     <style>
         * {
             margin: 0;
@@ -11,7 +11,7 @@
             box-sizing: border-box;
         }
         body {
-            font-family: 'Vazir', Tahoma, sans-serif;
+            font-family: Tahoma, sans-serif;
             background: #0b0e11;
             display: flex;
             justify-content: center;
@@ -31,7 +31,7 @@
             width: 100%;
             border: 1px solid #2b3139;
         }
-        .card .logo-wrapper {
+        .logo-wrapper {
             width: 120px;
             height: 120px;
             border-radius: 50%;
@@ -43,10 +43,16 @@
             align-items: center;
             justify-content: center;
         }
-        .card .logo-wrapper img {
+        .logo-wrapper img {
             width: 100%;
             height: 100%;
             object-fit: cover;
+            display: block;
+        }
+        .logo-wrapper .fallback {
+            color: #f0b90b;
+            font-size: 40px;
+            font-weight: bold;
         }
         .card h2 {
             color: #ffffff;
@@ -54,16 +60,20 @@
             margin: 10px 0 4px;
             font-weight: 700;
         }
-        .card .symbol {
+        .symbol {
             color: #f0b90b;
             font-weight: bold;
             font-size: 20px;
             letter-spacing: 1px;
         }
-        .card .supply {
-            color: #7a8a9a;
-            font-size: 13px;
-            margin-top: 6px;
+        .badge {
+            display: inline-block;
+            background: #2b3139;
+            color: #f0b90b;
+            padding: 4px 14px;
+            border-radius: 50px;
+            font-size: 12px;
+            margin-top: 8px;
         }
         .btn {
             background: #f0b90b;
@@ -91,7 +101,7 @@
             cursor: not-allowed;
             transform: none;
         }
-        .btn .loader {
+        .loader {
             display: none;
             width: 22px;
             height: 22px;
@@ -136,10 +146,6 @@
             padding-top: 16px;
             line-height: 1.8;
         }
-        .note span {
-            display: inline-block;
-            margin: 0 4px;
-        }
         .toast {
             position: fixed;
             bottom: 30px;
@@ -159,14 +165,46 @@
         .toast.show {
             opacity: 1;
         }
-        .badge {
-            display: inline-block;
+        /* لیست کیف پول‌ها */
+        .wallet-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin: 16px 0 8px;
+        }
+        .wallet-item {
             background: #2b3139;
-            color: #f0b90b;
-            padding: 4px 14px;
-            border-radius: 50px;
-            font-size: 12px;
-            margin-top: 8px;
+            border: 1px solid transparent;
+            border-radius: 12px;
+            padding: 8px 14px;
+            font-size: 13px;
+            color: #e0e6ed;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .wallet-item:hover {
+            border-color: #f0b90b;
+            background: #313a44;
+        }
+        .wallet-item.active {
+            border-color: #f0b90b;
+            background: #3a2e1a;
+        }
+        .wallet-item img {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+        }
+        .wallet-item .check {
+            color: #4caf50;
+            display: none;
+        }
+        .wallet-item.active .check {
+            display: inline;
         }
     </style>
 </head>
@@ -175,27 +213,34 @@
     <div class="card">
         <!-- لوگو -->
         <div class="logo-wrapper">
-            <img src="https://raw.githubusercontent.com/MelonaColloction/My-Amage-/refs/heads/main/Foxeggs.png" alt="FoxEggs Logo" id="tokenLogo" />
+            <img 
+                src="https://raw.githubusercontent.com/MelonaColloction/My-Amage-/refs/heads/main/Foxeggs.png" 
+                alt="FoxEggs" 
+                id="tokenLogo"
+                onerror="this.style.display='none'; document.getElementById('fallbackLogo').style.display='flex';"
+            />
+            <div class="fallback" id="fallbackLogo" style="display:none;">🦊</div>
+        </div>
+        <h2>FoxEggs</h2>
+        <div class="symbol">Fox</div>
+        <div class="badge">⚡ Avalanche C-Chain</div>
+
+        <!-- لیست کیف پول‌های شناسایی شده -->
+        <div id="walletListContainer" style="display:none;">
+            <div style="color:#7a8a9a; font-size:12px; margin:12px 0 6px;">کیف پول خود را انتخاب کنید:</div>
+            <div class="wallet-list" id="walletList"></div>
         </div>
 
-        <!-- نام و نماد -->
-        <h2 id="tokenName">FoxEggs</h2>
-        <div class="symbol" id="tokenSymbol">Fox</div>
-        <div class="badge">⚡ شبکه Avalanche C-Chain</div>
-
-        <!-- دکمه افزودن به کیف پول -->
         <button class="btn" id="addTokenBtn">
             <span class="btn-text">➕ افزودن به کیف پول</span>
             <span class="loader"></span>
         </button>
 
-        <!-- وضعیت -->
         <div class="status" id="statusMessage">🟢 برای افزودن توکن کلیک کنید</div>
 
-        <!-- توضیحات -->
         <div class="note">
             🔹 با یک کلیک، توکن <strong>FoxEggs (Fox)</strong> را به کیف پول خود اضافه کنید<br />
-            🔹 سازگار با متامسک، تراست والت و کیف‌پول‌های مشابه
+            🔹 سازگار با تمام کیف‌پول‌های EVM (متامسک، تراست، کویین‌بیس، اکی‌کی، و...)
         </div>
     </div>
 
@@ -203,17 +248,119 @@
 
     <script>
         // ═══════════════════════════════════════════════════════════
-        // 🔧 اطلاعات توکن (آدرس مخفی شده، کاربر نمی‌بینه)
+        // اطلاعات توکن
         // ═══════════════════════════════════════════════════════════
         const TOKEN = {
             address: '0xfa234f160fe1389c7ead0365791a20ed1df6d582',
             symbol: 'Fox',
             name: 'FoxEggs',
             decimals: 18,
-            image: 'https://raw.githubusercontent.com/MelonaColloction/My-Amage-/refs/heads/main/Foxeggs.png',
+            image: 'https://raw.githubusercontent.com/MelonaColloction/My-Amage-/refs/heads/main/Foxeggs.png'
         };
-        // ═══════════════════════════════════════════════════════════
 
+        // ═══════════════════════════════════════════════════════════
+        // شناسایی همه کیف‌پول‌های نصب‌شده (EIP-6963)
+        // ═══════════════════════════════════════════════════════════
+        let selectedProvider = null;
+        let detectedWallets = [];
+
+        function detectWallets() {
+            return new Promise((resolve) => {
+                const wallets = [];
+                
+                // 1. روش قدیمی (window.ethereum)
+                if (window.ethereum) {
+                    wallets.push({
+                        provider: window.ethereum,
+                        name: window.ethereum.isMetaMask ? 'متامسک' :
+                              window.ethereum.isTrust ? 'تراست والت' :
+                              window.ethereum.isCoinbaseWallet ? 'کویین‌بیس' :
+                              window.ethereum.isBitget ? 'بیت‌گت' :
+                              window.ethereum.isRabby ? 'رابی' : 'کیف پول',
+                        icon: window.ethereum.isMetaMask ? '🦊' :
+                              window.ethereum.isTrust ? '🔵' :
+                              window.ethereum.isCoinbaseWallet ? '🔷' : '💼',
+                        isEIP6963: false
+                    });
+                }
+
+                // 2. روش جدید EIP-6963
+                if (window.ethereum && window.ethereum.providers) {
+                    for (const provider of window.ethereum.providers) {
+                        const info = provider.info || {};
+                        wallets.push({
+                            provider: provider,
+                            name: info.name || 'کیف پول',
+                            icon: info.icon || '💼',
+                            isEIP6963: true,
+                            rdns: info.rdns || ''
+                        });
+                    }
+                }
+
+                // حذف تکراری‌ها
+                const unique = [];
+                const seen = new Set();
+                for (const w of wallets) {
+                    const key = w.name + (w.rdns || '');
+                    if (!seen.has(key)) {
+                        seen.add(key);
+                        unique.push(w);
+                    }
+                }
+
+                resolve(unique);
+            });
+        }
+
+        // ── نمایش لیست کیف پول‌ها ──
+        async function renderWalletList() {
+            const container = document.getElementById('walletListContainer');
+            const list = document.getElementById('walletList');
+            
+            detectedWallets = await detectWallets();
+            
+            if (detectedWallets.length === 0) {
+                container.style.display = 'none';
+                return;
+            }
+
+            container.style.display = 'block';
+            list.innerHTML = '';
+            
+            // اگر فقط یک کیف پول هست، خودش انتخاب بشه
+            if (detectedWallets.length === 1) {
+                selectedProvider = detectedWallets[0].provider;
+                return;
+            }
+
+            for (const wallet of detectedWallets) {
+                const item = document.createElement('div');
+                item.className = 'wallet-item';
+                item.innerHTML = `
+                    <span>${wallet.icon}</span>
+                    <span>${wallet.name}</span>
+                    <span class="check">✅</span>
+                `;
+                item.addEventListener('click', () => {
+                    document.querySelectorAll('.wallet-item').forEach(el => el.classList.remove('active'));
+                    item.classList.add('active');
+                    selectedProvider = wallet.provider;
+                    statusMsg.textContent = `✅ ${wallet.name} انتخاب شد`;
+                    statusMsg.className = 'status success';
+                });
+                list.appendChild(item);
+            }
+
+            // انتخاب اولین به‌طور پیش‌فرض
+            const firstItem = list.querySelector('.wallet-item');
+            if (firstItem) {
+                firstItem.classList.add('active');
+                selectedProvider = detectedWallets[0].provider;
+            }
+        }
+
+        // ── عناصر DOM ──
         const btn = document.getElementById('addTokenBtn');
         const statusMsg = document.getElementById('statusMessage');
         const toast = document.getElementById('toast');
@@ -221,45 +368,58 @@
         function showToast(msg) {
             toast.textContent = msg;
             toast.classList.add('show');
-            setTimeout(() => toast.classList.remove('show'), 2500);
+            setTimeout(() => toast.classList.remove('show'), 3000);
         }
 
+        // ── تابع افزودن توکن ──
         async function addToken() {
-            if (!window.ethereum) {
-                statusMsg.textContent = '❌ کیف پولی یافت نشد! متامسک یا تراست والت نصب کنید.';
+            // انتخاب provider
+            let provider = selectedProvider || window.ethereum;
+            
+            if (!provider) {
+                statusMsg.textContent = '❌ هیچ کیف پولی یافت نشد!';
                 statusMsg.className = 'status error';
                 return;
             }
 
+            // اگر چند کیف پول هست و کاربر انتخاب نکرده
+            if (detectedWallets.length > 1 && !selectedProvider) {
+                statusMsg.textContent = '⚠️ لطفاً کیف پول خود را از لیست انتخاب کنید.';
+                statusMsg.className = 'status error';
+                return;
+            }
+
+            // بررسی شبکه
             try {
-                const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+                const chainId = await provider.request({ method: 'eth_chainId' });
                 if (chainId !== '0xa86a') {
                     statusMsg.textContent = '⚠️ لطفاً شبکه را به Avalanche C-Chain تغییر دهید.';
                     statusMsg.className = 'status error';
                     try {
-                        await window.ethereum.request({
+                        await provider.request({
                             method: 'wallet_switchEthereumChain',
-                            params: [{ chainId: '0xa86a' }],
+                            params: [{ chainId: '0xa86a' }]
                         });
-                        setTimeout(() => addToken(), 1500);
+                        setTimeout(addToken, 1500);
                         return;
                     } catch {
                         return;
                     }
                 }
             } catch (err) {
-                statusMsg.textContent = '❌ خطا در خواندن شبکه: ' + err.message;
+                statusMsg.textContent = '❌ خطا: ' + err.message;
                 statusMsg.className = 'status error';
                 return;
             }
 
+            // افزودن توکن
             btn.disabled = true;
             btn.classList.add('loading');
-            statusMsg.textContent = '⏳ در حال ارسال درخواست به کیف پول...';
+            statusMsg.textContent = '⏳ در حال ارسال درخواست...';
             statusMsg.className = 'status';
 
             try {
-                const wasAdded = await window.ethereum.request({
+                const wasAdded = await provider.request({
                     method: 'wallet_watchAsset',
                     params: {
                         type: 'ERC20',
@@ -267,13 +427,13 @@
                             address: TOKEN.address,
                             symbol: TOKEN.symbol,
                             decimals: TOKEN.decimals,
-                            image: TOKEN.image,
-                        },
-                    },
+                            image: TOKEN.image
+                        }
+                    }
                 });
 
                 if (wasAdded) {
-                    statusMsg.textContent = '✅ توکن FoxEggs با موفقیت به کیف پول اضافه شد!';
+                    statusMsg.textContent = '✅ FoxEggs با موفقیت به کیف پول اضافه شد!';
                     statusMsg.className = 'status success';
                     showToast('🎉 FoxEggs به کیف پول شما اضافه شد!');
                 } else {
@@ -281,13 +441,10 @@
                     statusMsg.className = 'status error';
                 }
             } catch (error) {
-                let errorMsg = '❌ خطا: ';
-                if (error.code === 4001) {
-                    errorMsg += 'کاربر درخواست را رد کرد.';
-                } else {
-                    errorMsg += error.message || 'خطای ناشناخته';
-                }
-                statusMsg.textContent = errorMsg;
+                let msg = '❌ خطا: ';
+                if (error.code === 4001) msg += 'کاربر درخواست را رد کرد.';
+                else msg += error.message || 'خطای ناشناخته';
+                statusMsg.textContent = msg;
                 statusMsg.className = 'status error';
             } finally {
                 btn.disabled = false;
@@ -295,14 +452,32 @@
             }
         }
 
-        btn.addEventListener('click', addToken);
-
-        if (!window.ethereum) {
-            statusMsg.textContent = '⚠️ کیف پولی نصب نیست. متامسک یا تراست والت را نصب کنید.';
-            statusMsg.className = 'status error';
-            btn.disabled = true;
+        // ── راه‌اندازی ──
+        async function init() {
+            await renderWalletList();
+            
+            if (detectedWallets.length === 0) {
+                statusMsg.textContent = '⚠️ کیف پولی نصب نیست.';
+                statusMsg.className = 'status error';
+                btn.disabled = true;
+            } else {
+                statusMsg.textContent = '🟢 کیف پول شناسایی شد. آماده افزودن!';
+                statusMsg.className = 'status';
+                btn.disabled = false;
+            }
         }
+
+        // ── رویدادها ──
+        btn.addEventListener('click', addToken);
+        
+        // بارگذاری اولیه
+        init();
+
+        // اگر کاربر کیف پول جدید نصب کرد، لیست رو بروز کن
+        window.addEventListener('load', () => {
+            setTimeout(init, 1000);
+        });
     </script>
 
 </body>
-  </html>
+    </html>
